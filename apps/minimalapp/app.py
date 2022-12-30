@@ -130,7 +130,7 @@ def contact_complete():
 
         if not email:
             flash("メールアドレスは必須です")
-        is_valid = False
+            is_valid = False
 
         try:
             validate_email(email)
