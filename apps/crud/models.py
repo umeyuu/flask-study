@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from werkzeug.security import generate_password_hash
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
 
-from apps.app import db
+from apps.app import db, login_manager
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     # テーブル名を指定する
     __tablename__ = "users"
     # カラムを定義する
@@ -24,3 +25,17 @@ class User(db.Model):
     @password.setter
     def password(self, password):
         self.password_hash = generate_password_hash(password)
+
+    # パスワードをチェックする
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    # メールアドレス重複チェック
+    def is_duplicate_email(self):
+        return User.query.filter_by(email=self.email).first() is not None
+
+
+# ログインしているユーザー情報を取得する関数
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
