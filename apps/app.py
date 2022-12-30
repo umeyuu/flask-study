@@ -7,9 +7,7 @@ from flask_wtf.csrf import CSRFProtect
 
 from apps.config import config
 
-# SQLAlchemyをインスタンス化する
 db = SQLAlchemy()
-
 csrf = CSRFProtect()
 
 
@@ -28,5 +26,11 @@ def create_app(config_key):
 
     from apps.crud import views as crud_views
 
+    # register_blueprintを使いviewsのcrudをアプリへ登録する
     app.register_blueprint(crud_views.crud, url_prefix="/crud")
+
+    from apps.auth import views as auth_views
+
+    # register_blueprintを使いviewsのauthをアプリへ登録する
+    app.register_blueprint(auth_views.auth, url_prefix="/auth")
     return app
