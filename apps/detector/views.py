@@ -12,6 +12,7 @@ from flask import (
     flash,
     redirect,
     render_template,
+    request,
     send_from_directory,
     url_for,
 )
@@ -234,3 +235,59 @@ def delete_image(image_id):
         db.session.rollback()
 
     return redirect(url_for("detector.index"))
+
+
+@dt.route("/images/search", methods=["GET"])
+def search():
+    # 画像一覧を取得
+    user_images = db.session.query(User, UserImage).join(
+        UserImage, User.id == UserImage.user_id
+    )
+
+    # 検索ワードを取得
+    search_text = request.args.get("search")
+    user_image_tag_dict = {}
+    filter_user_images = []
+
+    # user_imagesに紐づくタグ情報を検索
+    for user_image in user_images:
+        # 検索ワードが無い場合
+        if not search_text:
+            # タグ一覧を取得する
+            user_image_tags = (
+                db.session.query(UserImageTag)
+                .filter(UserImageTag.user_image_id == user_image.UserImage.id)
+                .all()
+            )
+        else:
+            user_image_tags = (
+                db.session.query(UserImageTag)
+                .filter(UserImageTag.user_image_id == user_image.UserImage.id)
+                .filter(UserImageTag.tag_name.like("%" + search_text + "%"))
+                .all()
+            )
+
+            # タグが見つからなかったら、画像を返さない
+            if not user_image_tags:
+                continue
+
+            # タグ情報を取得しなおす
+            user_image_tags = (
+                db.session.query(UserImageTag)
+                .filter(UserImageTag.user_image_id == user_image.UserImage.id)
+                .all()
+            )
+
+        user_image_tag_dict[user_image.UserImage.id] = user_image_tags
+        filter_user_images.append(user_image)
+
+    delete_form = DeleteForm()
+    detector_form = DetectorForm()
+
+    return render_template(
+        "detector/index.html",
+        user_images=filter_user_images,
+        user_image_tag_dict=user_image_tag_dict,
+        delete_form=delete_form,
+        detector_form=detector_form,
+    )
