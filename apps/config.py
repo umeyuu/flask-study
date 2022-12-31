@@ -114,6 +114,9 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
 
+    # 画像アップロード先にtestes/detector/imagesを指定する
+    UPLOAD_FOLDER = str(Path(basedir, "tests", "detector", "images"))
+
 
 # config辞書にマッピングする
 config = {"testing": TestingConfig, "local": LocalConfig}
