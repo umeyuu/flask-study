@@ -22,19 +22,6 @@ def load_filenames(dir_name: str) -> list[str]:
     return filenames
 
 
-# テーブルを作成する関数
-def create_table(dbname):
-    conn = sqlite3.connect(dbname)
-    cur = conn.cursor()
-    cur.execute("DROP TABLE IF EXISTS image_info")
-    cur.execute(
-        "CREATE TABLE image_info (id INTEGER PRIMARY KEY AUTOINCREMENT, filename STRING)"
-    )
-    conn.commit()
-    conn.close()
-    print("table is successully created")
-
-
 # 手書き文字画像のファイル名をデータベースに保存
 def insert_filenames(request) -> tuple:
     dir_name = request.json["dir_name"]
